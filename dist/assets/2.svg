@@ -1,0 +1,2 @@
+<!-- <svg  width="216" height="360" xmlns="http://www.w3.org/2000/svg"><path d="M48 96H0V48L48 0h120l48 48v96L48 288v24h168v48H0v-91.2l168-144v-60L151.2 48H64.8L48 64.8z" stroke-miterlimit="10" font-family="sans-serif" font-size="12"/></svg> -->
+<svg width="216" height="360" xmlns="http://www.w3.org/2000/svg"><path d="M168 0l48 48v120L48 312h168v48H0v-72l168-144V64.8L151.2 48H64.8L48 64.8V96H0V48L48 0z" stroke-miterlimit="10" font-family="sans-serif" font-size="12"/></svg>
