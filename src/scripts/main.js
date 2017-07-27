@@ -8,6 +8,8 @@ const orbitControls = OrbitControls(THREE);
 import Helpers from './util/helpers';
 import Util from './util/util';
 
+import Head from './object/head';
+
 let scene,
     camera,
     renderer,
@@ -28,6 +30,11 @@ function init () {
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setClearColor(0x1a1a1a, 1);
+
+    let head = new Head();
+
+    // scene.add(head.mesh);
+
     document.body.appendChild( renderer.domElement );
 
 }
