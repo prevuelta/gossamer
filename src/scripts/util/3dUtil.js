@@ -53,10 +53,28 @@ export function lathe (
 
     let geometry = new BufferGeometry({ flat: true });
 
-    let vertices = splines.reduce((a, b) => a.concat(b));
+    let vertices = splines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
+
+    console.log(vertices);
 
     geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
 
+    let indices = [];
+    let x = spline.length;
+
+    for (let i = 0; i < vertices.length / 3; i++) {
+        if (!i || (i+1) % x > 0) {
+            if(i < x*divisions-x) {
+                indices.push(i, i+x, i+1, i+x, i+x+1, i+1);
+            } else if ( i > x*divisions-x-1) {
+                indices.push(i, i%x, i+1, i%x, i%x+1, i+1);
+            }
+        }
+    };
+
+    console.log(indices);
+
+    geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
 
     // let latheGeometry = new Geometry();
 
