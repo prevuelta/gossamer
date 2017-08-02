@@ -33,7 +33,8 @@ function init () {
 
     let head = new Head();
 
-    // scene.add(head.mesh);
+    scene.add(head.mesh);
+    // scene.add(Helpers.wireframe(head.mesh));
 
     document.body.appendChild( renderer.domElement );
 

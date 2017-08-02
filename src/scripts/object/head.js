@@ -9,7 +9,6 @@ export default function (
     height = 100,
     radius = 10
 ) {
-    let geometry = new THREE.Geometry();
 
     let hm = new Measure(Math.min(window.innerWidth, window.innerHeight) / (Math.sqrt(2) * 36)); 
 
@@ -38,9 +37,12 @@ export default function (
         //   c1,
         //   aC
         // ));
+    let lathed = lathe(headSpline, 4, new THREE.Vector3(0, 0, 1), true);
 
-    // return {
-    //     geometry,
-    //     mesh
-    // }
+    let mesh = new THREE.Mesh(lathed, new THREE.MeshBasicMaterial());
+
+    return {
+        geometry: lathed,
+        mesh
+    }
 }

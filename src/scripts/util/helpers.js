@@ -1,5 +1,7 @@
 'use strict';
 
+import * as THREE from 'three';
+
 
 // let Cross = require('./cross');
 
@@ -36,7 +38,7 @@
     //mesh.applyMatrix(mS);
     //object.applyMatrix(mS);
 
-module.exports = {
+export default {
     // marker (pos, weight = 0.5) {
     //     let cross = Cross(weight);
 
