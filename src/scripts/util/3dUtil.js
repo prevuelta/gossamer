@@ -65,7 +65,7 @@ export function lathe (
                 indices.push(i, i%x, i+1, i%x, i%x+1, i+1);
             }
         }
-    };
+    }
 
     geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
 
@@ -111,75 +111,92 @@ export function latheRepeat(
     let splineCount = splines.length;
     let divisions = repeats * splineCount;
     let newSplines = []; //[][]
-    let rotationInc = Math.PI * 2 / (divisions / 2);
+    let rotationDelta = Math.PI * 2 / (divisions / 2);
 
-    let s = new BufferGeometry({ flat: true });
-
-    PShape s = createShape(GROUP);
-    PShape body = createShape();
+    let geometry = new BufferGeometry({ flat: true });
 
     if(divisions % splineCount != 0 || divisions < splineCount) {
-        throw new IllegalArgumentException("Divisions must be multiple of splines");
+        throw new Error("Divisions must be multiple of splines");
     }
 
-    float currentRot = rotationInc;
+    let currentRot = rotationDelta;
 
-    for (int i = 0; i < divisions; i++) {
-        System.arraycopy(splines[i % splineCount], 0, newSplines[i], 0, splines[i % splineCount].length);
-        if (i != 0) {
-            for(int j = 0; j < newSplines[i].length; j++) {
-                newSplines[i][j] = newSplines[i][j].dup().rot(axis, currentRot);
+    for (let i = 0; i < divisions; i++) {
+        newSplines[i] = splines[i % splineCount].slice();
+        if (i) {
+            for (let j = 0; j < newSplines[i].length; j++) {
+                newSplines[i][j].applyAxisAngle(axis, currentRot);
+                console.log(currentRot)
             }
-            if(i % 2 == 0) {
-                currentRot += rotationInc;
+            if (i % 2 == 0) {
+                currentRot += rotationDelta;
             }
         }
     }
 
-    body.setStroke(c3);
-    body.setStrokeWeight(globalStrokeWeight);
+    let vertices = splines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
 
-    body.beginShape(QUADS);
+    geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
+
+    let indices = [];
+    let x = splines[0].length;
+
+    for (let i = 0; i < vertices.length / 3; i++) {
+        if (!i || (i+1) % x > 0) {
+            if(i < x*divisions-x) {
+                indices.push(i, i+x, i+1, i+x, i+x+1, i+1);
+            } else if ( i > x*divisions-x-1) {
+                indices.push(i, i%x, i+1, i%x, i%x+1, i+1);
+            }
+        }
+    }
+
+    geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
+
+    // body.beginShape(QUADS);
         // body.fill(shapeFill);
-        for (int l = 0; l < newSplines[0].length; l++) {
-            float colorInterval = (float)l / (float)newSplines[0].length;
-            body.fill(lerpColor(shapeFill1, shapeFill2, colorInterval ));
-            if (l != 0) {
-                for (int m = 1; m <= divisions; m++) {
-                    int n = m == divisions ? 0 : m;
-                    d.sVert(body, newSplines[n][l]);
-                    d.sVert(body, newSplines[n][l-1]);
-                    d.sVert(body, newSplines[m-1][l-1]);
-                    d.sVert(body, newSplines[m-1][l]);
-                }
-            }
-        }
-    body.endShape();
+        // for (let l = 0; l < newSplines[0].length; l++) {
+        //     // float colorInterval = (float)l / (float)newSplines[0].length;
+            // body.fill(lerpColor(shapeFill1, shapeFill2, colorInterval ));
+            // if (l != 0) {
+            //     for (let m = 1; m <= divisions; m++) {
+            //         let = m == divisions ? 0 : m;
+            //         d.sVert(body, newSplines[n][l]);
+            //         d.sVert(body, newSplines[n][l-1]);
+            //         d.sVert(body, newSplines[m-1][l-1]);
+            //         d.sVert(body, newSplines[m-1][l]);
+            //     }
+            // }
+        // }
 
-    if (capped) {
+    // if (capped) {
 
-        PShape bottom = createShape();
-        PShape top = createShape();
+        // PShape bottom = createShape();
+        // PShape top = createShape();
 
-        top.beginShape();
-            top.fill(capFill);
-            for (int n = 0; n < divisions; n++) {
-                d.sVert(top, newSplines[n][0]);
-            }
-        top.endShape();
-        bottom.beginShape();
-            bottom.fill(capFill);
-            for (int o = 0; o < divisions; o++) {
-                d.sVert(bottom, newSplines[o][newSplines[0].length-1]);
-            }
-        bottom.endShape();
-        s.addChild(top);
-        s.addChild(bottom);
+        // top.beginShape();
+        //     top.fill(capFill);
+        //     for (int n = 0; n < divisions; n++) {
+        //         d.sVert(top, newSplines[n][0]);
+        //     }
+        // top.endShape();
+        // bottom.beginShape();
+        //     bottom.fill(capFill);
+        //     for (int o = 0; o < divisions; o++) {
+        //         d.sVert(bottom, newSplines[o][newSplines[0].length-1]);
+        //     }
+        // bottom.endShape();
+        // s.addChild(top);
+        // s.addChild(bottom);
+    // }
+
+    // s.addChild(body);
+    console.log("what")
+    console.log(vertices, indices, geometry);
+
+    return {
+        geometry
     }
-
-    s.addChild(body);
-
-    return s;
 
 }
 

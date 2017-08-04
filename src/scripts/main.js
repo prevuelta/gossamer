@@ -34,7 +34,10 @@ function init () {
     let head = new Head();
 
     scene.add(head.mesh);
+    scene.add(head.meshRepeat);
+
     scene.add(Helpers.wireframe(head.mesh.geometry));
+    scene.add(Helpers.wireframe(head.meshRepeat.geometry));
 
     document.body.appendChild( renderer.domElement );
 
