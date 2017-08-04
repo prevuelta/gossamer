@@ -37,11 +37,8 @@ export function lathe (
     capFill = 0x00ff00
 ) {
 
-    // IVec[][] splines = new IVec[divisions][spline.length];
     let splines = [];
-    // splines[0] = spline;
     splines[0] = spline;
-
     let rotationInc = Math.PI * 2 / divisions;
 
     for (let i = 1; i < divisions;i++) {
@@ -54,8 +51,6 @@ export function lathe (
     let geometry = new BufferGeometry({ flat: true });
 
     let vertices = splines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
-
-    console.log(vertices);
 
     geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
 
@@ -72,37 +67,7 @@ export function lathe (
         }
     };
 
-    console.log(indices);
-
     geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
-
-    // let latheGeometry = new Geometry();
-
-
-    // Generate vertices
-    let faces = [];
-
-    splines.forEach(d => {
-        d.forEach(s => {
-            
-        });
-    });
-
-    // for (let k = 0; k < spline.length; k++) {
-    //     if (k != 0) {
-    //         for (let l = 1; l <= divisions; l++) {
-    //             let m = l == divisions ? 0 : l;
-    //             vertices.push(splines[m][k]);
-    //             vertices.push(splines[m][k-1])
-    //             vertices.push(splines[l-1][k-1]);
-                // vertices
-                // d.sVert(body, splines[m][k]);
-                // d.sVert(body, splines[m][k-1]);
-                // d.sVert(body, splines[l-1][k-1]);
-                // d.sVert(body, splines[l-1][k]);
-            // }
-        // }
-    // }
 
     // if (capped) {
 
@@ -132,4 +97,90 @@ export function lathe (
         geometry
     };
 }
+
+export function latheRepeat(
+    splines,
+    repeats,
+    axis,
+    capped,
+    shapeFill1,
+    shapeFill2,
+    capFill
+) {
+
+    let splineCount = splines.length;
+    let divisions = repeats * splineCount;
+    let newSplines = []; //[][]
+    let rotationInc = Math.PI * 2 / (divisions / 2);
+
+    let s = new BufferGeometry({ flat: true });
+
+    PShape s = createShape(GROUP);
+    PShape body = createShape();
+
+    if(divisions % splineCount != 0 || divisions < splineCount) {
+        throw new IllegalArgumentException("Divisions must be multiple of splines");
+    }
+
+    float currentRot = rotationInc;
+
+    for (int i = 0; i < divisions; i++) {
+        System.arraycopy(splines[i % splineCount], 0, newSplines[i], 0, splines[i % splineCount].length);
+        if (i != 0) {
+            for(int j = 0; j < newSplines[i].length; j++) {
+                newSplines[i][j] = newSplines[i][j].dup().rot(axis, currentRot);
+            }
+            if(i % 2 == 0) {
+                currentRot += rotationInc;
+            }
+        }
+    }
+
+    body.setStroke(c3);
+    body.setStrokeWeight(globalStrokeWeight);
+
+    body.beginShape(QUADS);
+        // body.fill(shapeFill);
+        for (int l = 0; l < newSplines[0].length; l++) {
+            float colorInterval = (float)l / (float)newSplines[0].length;
+            body.fill(lerpColor(shapeFill1, shapeFill2, colorInterval ));
+            if (l != 0) {
+                for (int m = 1; m <= divisions; m++) {
+                    int n = m == divisions ? 0 : m;
+                    d.sVert(body, newSplines[n][l]);
+                    d.sVert(body, newSplines[n][l-1]);
+                    d.sVert(body, newSplines[m-1][l-1]);
+                    d.sVert(body, newSplines[m-1][l]);
+                }
+            }
+        }
+    body.endShape();
+
+    if (capped) {
+
+        PShape bottom = createShape();
+        PShape top = createShape();
+
+        top.beginShape();
+            top.fill(capFill);
+            for (int n = 0; n < divisions; n++) {
+                d.sVert(top, newSplines[n][0]);
+            }
+        top.endShape();
+        bottom.beginShape();
+            bottom.fill(capFill);
+            for (int o = 0; o < divisions; o++) {
+                d.sVert(bottom, newSplines[o][newSplines[0].length-1]);
+            }
+        bottom.endShape();
+        s.addChild(top);
+        s.addChild(bottom);
+    }
+
+    s.addChild(body);
+
+    return s;
+
+}
+
 
