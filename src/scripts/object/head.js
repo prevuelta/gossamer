@@ -57,8 +57,6 @@ export default function (
         [0, 0]
     ]);
 
-    console.log(spline1, spline1.slice());
-
     let repeatGeometry = latheRepeat(
         [
             spline1.slice(),
@@ -66,7 +64,7 @@ export default function (
             spline2.slice(),
             spline2.slice()
         ],
-        4,
+        8,
         new THREE.Vector3(0, 0, 1),
         true
     );

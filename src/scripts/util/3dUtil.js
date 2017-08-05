@@ -122,11 +122,12 @@ export function latheRepeat(
     let currentRot = rotationDelta;
 
     for (let i = 0; i < divisions; i++) {
-        newSplines[i] = splines[i % splineCount].slice();
+        newSplines[i] = splines[i % splineCount].slice().map(v => v.clone());
         if (i) {
             for (let j = 0; j < newSplines[i].length; j++) {
+                // newSplines[i][j] = newSplines[i][j].clone().applyAxisAngle(axis, currentRot);
                 newSplines[i][j].applyAxisAngle(axis, currentRot);
-                console.log(currentRot)
+                // console.log(currentRot)
             }
             if (i % 2 == 0) {
                 currentRot += rotationDelta;
@@ -134,24 +135,29 @@ export function latheRepeat(
         }
     }
 
-    let vertices = splines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
+    let vertices = newSplines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
+
+    // console.log(vertices, vertices.length);
 
     geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
 
     let indices = [];
     let x = splines[0].length;
 
+    console.log(newSplines.length, repeats, vertices.length);
+
     for (let i = 0; i < vertices.length / 3; i++) {
         if (!i || (i+1) % x > 0) {
             if(i < x*divisions-x) {
-                indices.push(i, i+x, i+1, i+x, i+x+1, i+1);
-            } else if ( i > x*divisions-x-1) {
-                indices.push(i, i%x, i+1, i%x, i%x+1, i+1);
+                console.log(i);
+                indices.push(i+1, i+x, i, i+1, i+x+1, i+x);
+            } else if ( i > divisions-x-1) {
+                indices.push(i+1, i%x, i, i+1, i%x+1, i%x);
             }
         }
     }
 
-    geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
+    geometry.setIndex(new BufferAttribute(new Uint16Array(indices), 1));
 
     // body.beginShape(QUADS);
         // body.fill(shapeFill);
@@ -191,8 +197,6 @@ export function latheRepeat(
     // }
 
     // s.addChild(body);
-    console.log("what")
-    console.log(vertices, indices, geometry);
 
     return {
         geometry
