@@ -2,13 +2,12 @@
 
 import * as THREE from 'three';
 import Measure from '../util/measure';
+import Materials from '../util/materials';
 import Aerial from './aerial';
 import { lathe, splineToVectorArray, latheRepeat } from  '../util/3dUtil'
 
 export default function (
     direction = new THREE.Vector3(0, 1, 0),
-    height = 100,
-    radius = 10
 ) {
 
     let hm = new Measure(Math.min(window.innerWidth, window.innerHeight) / (Math.sqrt(2) * 36)); 
@@ -70,17 +69,28 @@ export default function (
         true
     );
 
-    let apex = new THREE.Vector3(0, 0, -this.height);
+    let apex = new THREE.Vector3(0, 0, -hm.m(8));
 
-    let mesh = new THREE.Mesh(lathed.geometry, new THREE.MeshBasicMaterial());
-    let aerial = Aerial(hm.m(3), hm.d(2)).mesh;
+    console.log(Materials);
+
+    let group = new THREE.Mesh();
+
+    // lathed.geometry.computeFaceNormals()t
+
+    lathed.computeVertexNormals();
+
+    let mesh = new THREE.Mesh(lathed, Materials.BASIC);
+    // mesh.computeFaceNormals();
+    // mesh.computeVerticeNormals();
+    let aerial = Aerial(hm.m(8), hm.d(2));
     aerial.position.set(apex.x, apex.y, -hm.m(3.5));
-    mesh.add(aerial);
-    let meshRepeat = new THREE.Mesh(repeatGeometry.geometry, new THREE.MeshBasicMaterial());
+    group.add(mesh);
+    group.add(aerial);
 
-    return {
-        geometry: lathed,
-        mesh,
-        meshRepeat
-    }
+    repeatGeometry.computeVertexNormals();
+
+    let meshRepeat = new THREE.Mesh(repeatGeometry, Materials.BASIC);
+    group.add(meshRepeat);
+
+    return group;
 }

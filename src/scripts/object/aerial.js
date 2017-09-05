@@ -2,6 +2,8 @@
 
 import { Vector3, Mesh, MeshBasicMaterial } from 'three';
 import { lathe, splineToVectorArray, latheRepeat } from  '../util/3dUtil'
+import Line from './line';
+import Materials from '../util/materials';
 
 export default function Aerial (
     length,
@@ -18,11 +20,11 @@ export default function Aerial (
         12, new Vector3(0, 0, 1), true
     );
 
-    let mesh = new Mesh(lathed.geometry, new MeshBasicMaterial());
+    let mesh = new Mesh(lathed, Materials.BASIC);
+    let line = Line(new Vector3(0, 0, 0), new Vector3(0, 0, -length));
 
-    return {
-        geometry: lathed.geometry,
-        mesh
-    };
+    mesh.add(line);
+
+    return mesh;
 
 }

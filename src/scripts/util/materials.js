@@ -1,17 +1,16 @@
 'use strict'
 
-let frag = require('../shaders/spherefrag.shader');
-let vert = require('../shaders/spherevert.shader');
+import { ShaderMaterial } from 'three';
+import frag from '../shaders/frag.shader';
+import vert from '../shaders/vert.shader';
 
-let material =  new THREE.ShaderMaterial( {
+let material =  new ShaderMaterial( {
     uniforms: {
-        time: { value: 1.0 },
-        resolution: { value: new THREE.Vector2() }
     },
     vertexShader: vert,
     fragmentShader: frag
 });
 
-module.exports = {
+export default {
     BASIC: material
 };

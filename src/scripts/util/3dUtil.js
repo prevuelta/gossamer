@@ -33,13 +33,13 @@ export function fanShape (
     count,
     axist,
     radius,
-    rotateZ,
-    offset
+    rotateZ = false,
+    offset = 0
 ) {
 
-    let buffer = new BufferGeometry();
+    let buffer = new BufferGeometry({ flat: true });
     const TWO_PI = Math.PI * 2;
-    for (let theta = offset, theta < TWO_PI + offset; theta += TWO_PI / count) {
+    for (let theta = offset; theta < TWO_PI + offset; theta += TWO_PI / count) {
         let x = Math.sin(theta) * radius;
         let y = Math.cos(theta) * radius;
     };
@@ -96,10 +96,8 @@ export function lathe (
     geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
     geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
 
-    return {
-        vertices,
-        geometry
-    };
+    return geometry;
+
 }
 
 export function latheRepeat(
@@ -207,10 +205,8 @@ export function latheRepeat(
     // }
 
     // s.addChild(body);
+    return geometry;
 
-    return {
-        geometry
-    }
 
 }
 
