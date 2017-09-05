@@ -70,12 +70,7 @@ export default function (
         true
     );
 
-    let apex = new THREE.Vector3(0, 0, -this.height);
-
     let mesh = new THREE.Mesh(lathed.geometry, new THREE.MeshBasicMaterial());
-    let aerial = Aerial(hm.m(3), hm.d(2)).mesh;
-    aerial.position.set(apex.x, apex.y, -hm.m(3.5));
-    mesh.add(aerial);
     let meshRepeat = new THREE.Mesh(repeatGeometry.geometry, new THREE.MeshBasicMaterial());
 
     return {

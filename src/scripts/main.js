@@ -21,7 +21,7 @@ function init () {
     // scene.add(new THREE.AxisHelper(50));
 
     camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.z = 100;
+    camera.position.z = 300;
     camera.position.y = 20;
     camera.target = new THREE.Vector3( 0, 0, 0 );
 

@@ -28,6 +28,23 @@ export function splineToVectorArray (splineArray) {
     return splineVec;
 }
 
+export function fanShape (
+    shape,
+    count,
+    axist,
+    radius,
+    rotateZ,
+    offset
+) {
+
+    let buffer = new BufferGeometry();
+    const TWO_PI = Math.PI * 2;
+    for (let theta = offset, theta < TWO_PI + offset; theta += TWO_PI / count) {
+        let x = Math.sin(theta) * radius;
+        let y = Math.cos(theta) * radius;
+    };
+}
+
 export function lathe (
     spline,
     divisions,
@@ -37,25 +54,34 @@ export function lathe (
     capFill = 0x00ff00
 ) {
 
-    let splines = [];
-    splines[0] = spline;
+    let newSpline;
+    console.log(spline);
+
+    if (capped) {
+        newSpline = spline.slice(0);
+        let lastVertice = spline[spline.length-1];
+        newSpline.unshift(new Vector3(0, 0, spline[0].z));
+        newSpline.push(new Vector3(0, 0, lastVertice.z));
+    } else {
+        newSpline = spline;
+    }
+
+    let splines = [newSpline]; 
     let rotationInc = Math.PI * 2 / divisions;
 
     for (let i = 1; i < divisions;i++) {
         splines[i] = [];
-        for (let j = 0; j < spline.length; j++) {
+        for (let j = 0; j < newSpline.length; j++) {
             splines[i][j] = splines[i-1][j].clone().applyAxisAngle(axis, rotationInc);
         }
     }
 
     let geometry = new BufferGeometry({ flat: true });
 
-    let vertices = splines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
-
-    geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
+    let vertices = splines.reduce((a, b) => a.concat(b)).reduce((a, b) => a.concat(b.toArray()), []);
 
     let indices = [];
-    let x = spline.length;
+    let x = newSpline.length;
 
     for (let i = 0; i < vertices.length / 3; i++) {
         if (!i || (i+1) % x > 0) {
@@ -67,30 +93,8 @@ export function lathe (
         }
     }
 
+    geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
     geometry.setIndex(new BufferAttribute(new Uint8Array(indices), 1));
-
-    // if (capped) {
-
-        // PShape bottom = createShape();
-        // PShape top = createShape();
-
-        // top.beginShape();
-        //     top.fill(capFill);
-        //     for (let n = 0; n < divisions; n++) {
-        //         d.sVert(top, splines[n][0]);
-        //     }
-        // top.endShape();
-        // bottom.beginShape();
-        //     bottom.fill(capFill);
-        //     for (let o = 0; o < divisions; o++) {
-        //         d.sVert(bottom, splines[o][spline.length-1]);
-        //     }
-        // bottom.endShape();
-        // shape.addChild(top);
-        // shape.addChild(bottom);
-    // }
-
-    // shape.addChild(body);
 
     return {
         vertices,
@@ -110,7 +114,8 @@ export function latheRepeat(
 
     let splineCount = splines.length;
     let divisions = repeats * splineCount;
-    let newSplines = []; //[][]
+
+    let repeatedSplines  = [];
     let rotationDelta = Math.PI * 2 / (divisions / 2);
 
     let geometry = new BufferGeometry({ flat: true });
@@ -119,15 +124,26 @@ export function latheRepeat(
         throw new Error("Divisions must be multiple of splines");
     }
 
+    let newSplines;
+
+    if (capped) {
+        newSplines = splines.slice();
+        for (let spline of newSplines) {
+            let lastVertice = spline[spline.length-1];
+            spline.unshift(new Vector3(0, 0, spline[0].z));
+            spline.push(new Vector3(0, 0, lastVertice.z));
+        };
+    } else {
+        newSplines = splines;
+    }
+
     let currentRot = rotationDelta;
 
     for (let i = 0; i < divisions; i++) {
-        newSplines[i] = splines[i % splineCount].slice().map(v => v.clone());
+        repeatedSplines[i] = newSplines[i % splineCount].slice().map(v => v.clone());
         if (i) {
-            for (let j = 0; j < newSplines[i].length; j++) {
-                // newSplines[i][j] = newSplines[i][j].clone().applyAxisAngle(axis, currentRot);
-                newSplines[i][j].applyAxisAngle(axis, currentRot);
-                // console.log(currentRot)
+            for (let j = 0; j < repeatedSplines[i].length; j++) {
+                repeatedSplines[i][j].applyAxisAngle(axis, currentRot);
             }
             if (i % 2 == 0) {
                 currentRot += rotationDelta;
@@ -135,21 +151,14 @@ export function latheRepeat(
         }
     }
 
-    let vertices = newSplines.reduce((a, b) => a.concat(b)).map(v => [v.x, v.y, v.z]).reduce((a, b) => a.concat(b));
-
-    // console.log(vertices, vertices.length);
-
-    geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
+    let vertices = repeatedSplines.reduce((a, b) => a.concat(b)).map(v => v.toArray()).reduce((a, b) => a.concat(b));
 
     let indices = [];
     let x = splines[0].length;
 
-    console.log(newSplines.length, repeats, vertices.length);
-
     for (let i = 0; i < vertices.length / 3; i++) {
         if (!i || (i+1) % x > 0) {
             if(i < x*divisions-x) {
-                console.log(i);
                 indices.push(i+1, i+x, i, i+1, i+x+1, i+x);
             } else if ( i > divisions-x-1) {
                 indices.push(i+1, i%x, i, i+1, i%x+1, i%x);
@@ -157,6 +166,7 @@ export function latheRepeat(
         }
     }
 
+    geometry.addAttribute('position', new BufferAttribute(new Float32Array(vertices), 3));
     geometry.setIndex(new BufferAttribute(new Uint16Array(indices), 1));
 
     // body.beginShape(QUADS);
